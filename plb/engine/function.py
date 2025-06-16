@@ -77,7 +77,7 @@ class GradModel:
                 self.dists[j][i] = self.sim.primitives.primitives[j].sdf(f, self.sim.x[f, i])
 
     @ti.kernel
-    def _get_obs(self, s: ti.int32, x: ti.ext_arr(), c: ti.ext_arr()):
+    def _get_obs(self, s: ti.int32, x: ti.types.ndarray(), c: ti.types.ndarray()):
         for i in range(self.sim.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 x[i, j] = self.sim.x[s, i][j]
@@ -90,13 +90,13 @@ class GradModel:
                     c[idx, j+i.pos_dim] = i.rotation[s][j]
 
     @ti.kernel
-    def dist2torch(self, dist: ti.ext_arr()):
+    def dist2torch(self, dist: ti.types.ndarray()):
         for i in range(self.sim.n_particles[None]):
             for j in ti.static(range(len(self.dists))):
                 dist[i, j] = self.dists[j][i]
 
     @ti.kernel
-    def torch2dist_grad(self, dist_grad: ti.ext_arr()):
+    def torch2dist_grad(self, dist_grad: ti.types.ndarray()):
         for i in range(self.sim.n_particles[None]):
             for j in ti.static(range(len(self.dists))):
                 self.dists[j].grad[i] = dist_grad[i, j]
@@ -130,7 +130,7 @@ class GradModel:
 
 
     @ti.kernel
-    def _set_obs_grad(self, s:ti.int32, x:ti.ext_arr(), c:ti.ext_arr()):
+    def _set_obs_grad(self, s:ti.int32, x:ti.types.ndarray(), c:ti.types.ndarray()):
         for i in range(self.sim.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 self.sim.x.grad[s, i][j] += x[i, j]

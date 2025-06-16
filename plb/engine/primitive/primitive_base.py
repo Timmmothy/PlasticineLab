@@ -181,7 +181,7 @@ class Primitive:
             self.twist[target] = self.twist[source]
 
     @ti.kernel
-    def get_state_kernel(self, f: ti.i32, controller: ti.ext_arr()):
+    def get_state_kernel(self, f: ti.i32, controller: ti.types.ndarray()):
         for j in ti.static(range(self.pos_dim)):
             controller[j] = self.position[f][j]
         for j in ti.static(range(self.rotation_dim)):
@@ -192,7 +192,7 @@ class Primitive:
                 controller[7+j] = self.twist[f][j]
 
     @ti.kernel
-    def set_state_kernel(self, f: ti.i32, controller: ti.ext_arr()):
+    def set_state_kernel(self, f: ti.i32, controller: ti.types.ndarray()):
         for j in ti.static(range(self.pos_dim)):
             self.position[f][j] = controller[j]
         for j in ti.static(range(self.rotation_dim)):
@@ -231,7 +231,7 @@ class Primitive:
         raise NotImplementedError
 
     @ti.kernel
-    def set_action_kernel(self, s: ti.i32, action: ti.ext_arr()):
+    def set_action_kernel(self, s: ti.i32, action: ti.types.ndarray()):
         for j in ti.static(range(self.action_dim)):
             self.action_buffer[s][j] = action[j]
 
@@ -244,7 +244,7 @@ class Primitive:
         return
 
     @ti.kernel
-    def get_action_grad_kernel(self, s: ti.i32, n: ti.i32, grad: ti.ext_arr()):
+    def get_action_grad_kernel(self, s: ti.i32, n: ti.i32, grad: ti.types.ndarray()):
         for i in range(0, n):
             for j in ti.static(range(self.action_dim)):
                 grad[i, j] = self.action_buffer.grad[s + i][j]

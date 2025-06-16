@@ -324,7 +324,7 @@ class MPMSimulator:
 
     # ------------------------------------ io -------------------------------------#
     @ti.kernel
-    def readframe(self, f: ti.i32, x: ti.ext_arr(), v: ti.ext_arr(), F: ti.ext_arr(), C: ti.ext_arr()):
+    def readframe(self, f: ti.i32, x: ti.types.ndarray(), v: ti.types.ndarray(), F: ti.types.ndarray(), C: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 x[i, j] = self.x[f, i][j]
@@ -334,7 +334,7 @@ class MPMSimulator:
                     C[i, j, k] = self.C[f, i][j, k]
 
     @ti.kernel
-    def setframe(self, f: ti.i32, x: ti.ext_arr(), v: ti.ext_arr(), F: ti.ext_arr(), C: ti.ext_arr()):
+    def setframe(self, f: ti.i32, x: ti.types.ndarray(), v: ti.types.ndarray(), F: ti.types.ndarray(), C: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 self.x[f, i][j] = x[i, j]
@@ -373,7 +373,7 @@ class MPMSimulator:
             i.set_state(f, s)
 
     @ti.kernel
-    def reset_kernel(self, x: ti.ext_arr()):
+    def reset_kernel(self, x: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 self.x[0, i][j] = x[i, j]
@@ -386,13 +386,13 @@ class MPMSimulator:
         self.cur = 0
 
     @ti.kernel
-    def get_x_kernel(self, f: ti.i32, x: ti.ext_arr()):
+    def get_x_kernel(self, f: ti.i32, x: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 x[i, j] = self.x[f, i][j]
 
     @ti.kernel
-    def set_x(self, f: ti.i32, x: ti.ext_arr()):
+    def set_x(self, f: ti.i32, x: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 self.x[f, i][j] = x[i, j]
@@ -403,7 +403,7 @@ class MPMSimulator:
         return x
 
     @ti.kernel
-    def get_v_kernel(self, f: ti.i32, v: ti.ext_arr()):
+    def get_v_kernel(self, f: ti.i32, v: ti.types.ndarray()):
         for i in range(self.n_particles[None]):
             for j in ti.static(range(self.dim)):
                 v[i, j] = self.v[f, i][j]
