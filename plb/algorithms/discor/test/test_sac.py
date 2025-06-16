@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from gym import make
+from gymnasium import make
 from fluid.alchemy.rl.discor.algorithm import SAC
 from fluid.alchemy.rl.discor.agent import Agent
 

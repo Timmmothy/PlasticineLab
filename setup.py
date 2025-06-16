@@ -1,6 +1,6 @@
 from setuptools import setup
 
-install_requires = ['scipy', 'numpy', 'torch', 'opencv-python', 'tqdm', 'taichi', 'gym', 'tensorboard', 'yacs', 'matplotlib',
+install_requires = ['scipy', 'numpy', 'torch', 'opencv-python', 'tqdm', 'taichi', 'gymnasium', 'tensorboard', 'yacs', 'matplotlib',
                     'descartes', 'shapely', 'natsort', 'torchvision', 'einops', 'alphashape', 'tensorboardX', 'open3d']
 
 setup(name='plb',

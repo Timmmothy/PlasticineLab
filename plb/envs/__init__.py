@@ -1,6 +1,6 @@
-import gym
+import gymnasium as gym
 from .env import PlasticineEnv
-from gym import register
+from gymnasium import register
 
 ENVS = []
 for env_name in ['Move', 'Torus', 'Rope', 'Writer', 'HardWriter', "Pinch", "Rollingpin", "Chopsticks", "Table",
