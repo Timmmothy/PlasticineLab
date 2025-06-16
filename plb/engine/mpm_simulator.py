@@ -226,6 +226,7 @@ class MPMSimulator:
                 self.grid_v_in[base + offset] += weight * (self.p_mass * new_v + affine @ dpos)
                 self.grid_m[base + offset] += weight * self.p_mass
 
+    @ti.func
     def stencil_range(self):
         return ti.ndrange(*((3,) * self.dim))
 
