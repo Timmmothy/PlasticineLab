@@ -16,7 +16,7 @@ for env_name in ['Move', 'Torus', 'Rope', 'Writer', 'HardWriter', "Pinch", "Roll
 
 
 def make(env_name, nn=False, sdf_loss=10, density_loss=10, contact_loss=1, soft_contact_loss=False, seed=None):
-    env: PlasticineEnv = gym.make(env_name, nn=nn, seed=seed)
+    env: PlasticineEnv = gym.make(env_name, nn=nn, seed=seed, render_mode='rgb_array')
     env.unwrapped.taichi_env.loss.set_weights(sdf=sdf_loss, density=density_loss,
                                     contact=contact_loss, is_soft_contact=soft_contact_loss)
     return env

@@ -117,6 +117,6 @@ def solve_action(env, path, logger, args):
 
     for idx, act in enumerate(action):
         env.step(act)
-        img = env.render(mode='rgb_array')
-        print(img.min(), img.max())
+        img = env.render()
+        # print(img.min(), img.max())
         cv2.imwrite(f"{path}/{idx:04d}.png", img[..., ::-1].astype(np.uint8))

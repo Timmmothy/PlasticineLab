@@ -11,7 +11,9 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 class PlasticineEnv(gym.Env):
-    def __init__(self, cfg_path, version, nn=False, seed=None):
+    metadata = {"render_modes": ["plt", "human", "rgb_array", "rgb", "rgbd"]}
+
+    def __init__(self, cfg_path, version, nn=False, seed=None, render_mode="human"):
         from ..engine.taichi_env import TaichiEnv
         self.cfg_path = cfg_path
         cfg = self.load_variants(cfg_path, version)
@@ -25,6 +27,8 @@ class PlasticineEnv(gym.Env):
         obs,info = self.reset(seed=seed)
         self.observation_space = Box(-np.inf, np.inf, obs.shape)
         self.action_space = Box(-1, 1, (self.taichi_env.primitives.action_dim,))
+
+        self.render_mode = render_mode
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -59,10 +63,10 @@ class PlasticineEnv(gym.Env):
             with open(f'{self.cfg_path}_nan_action_{str(datetime.datetime.now())}', 'wb') as f:
                 pickle.dump(self._recorded_actions, f)
             raise Exception("NaN..")
-        return obs, r, False, loss_info
+        return obs, r, False, False, loss_info
 
-    def render(self, mode='human', **kwargs):
-        return self.taichi_env.render(mode, **kwargs)
+    def render(self, **kwargs):
+        return self.taichi_env.render(self.render_mode, **kwargs)
 
     @classmethod
     def load_variants(self, cfg_path, version):
