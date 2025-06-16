@@ -288,7 +288,7 @@ class Loss:
         loss_info = self._extract_loss(0)
         self._start_loss = loss_info['loss']
         self._init_iou = loss_info['iou']
-        self._last_loss = 0  # in optim, loss will be clear after ti.Tape; for RL; we reset loss to zero in each step.
+        self._last_loss = 0  # in optim, loss will be clear after ti.ad.Tape; for RL; we reset loss to zero in each step.
 
     def compute_loss(self, f):
         loss_info = self._extract_loss(f)

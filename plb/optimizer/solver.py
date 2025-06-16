@@ -38,7 +38,7 @@ class Solver:
                 self.logger.reset()
 
             env.set_state(sim_state, self.cfg.softness, False)
-            with ti.Tape(loss=env.loss.loss):
+            with ti.ad.Tape(loss=env.loss.loss):
                 for i in range(len(action)):
                     env.step(action[i])
                     self.total_steps += 1

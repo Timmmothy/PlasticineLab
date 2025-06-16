@@ -33,7 +33,7 @@ class SolverNN:
             if self.logger is not None:
                 self.logger.reset()
 
-            with ti.Tape(loss=env.loss.loss):
+            with ti.ad.Tape(loss=env.loss.loss):
                 for i in range(self.horizon):
                     nn.set_action(i, env.simulator.substeps)
                     env.step()
