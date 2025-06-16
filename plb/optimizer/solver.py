@@ -112,7 +112,7 @@ def solve_action(env, path, logger, args):
 
     images = []
     for pos, rot in poses:
-        env.taichi_env.renderer.set_camera_pose(camera_pos=pos, camera_rot=rot)
+        env.unwrapped.taichi_env.renderer.set_camera_pose(camera_pos=pos, camera_rot=rot)
         
 
     for idx, act in enumerate(action):

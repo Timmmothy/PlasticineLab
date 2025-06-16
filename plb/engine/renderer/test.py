@@ -23,8 +23,8 @@ env = make("Move-v1")
 env.reset()
 
 #%%
-print(env.taichi_env.renderer.target_density.to_numpy().sum())
-print(env.taichi_env.renderer.visualize_target)
+print(env.unwrapped.taichi_env.renderer.target_density.to_numpy().sum())
+print(env.unwrapped.taichi_env.renderer.visualize_target)
 plt.imshow(env.render(mode='rgb_array')[..., ::-1])
 plt.show()
 
