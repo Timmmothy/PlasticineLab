@@ -20,11 +20,9 @@ class MPMSimulator:
             quality = quality * 0.5
         self.quality = quality
 
-        self.n_particles = ti.field(dtype=ti.i32, shape=(), needs_grad=False)
-
         max_particles = cfg.n_particles
         self.max_particles = max_particles
-        self.n_particles[None] = cfg.n_particles
+        self.n_particles = cfg.n_particles
 
         if self.dim == 3:
             n_grid = self.n_grid = int(128 * quality)
@@ -105,7 +103,7 @@ class MPMSimulator:
     @ti.kernel
     def clear_SVD_grad(self):
         zero = ti.Matrix.zero(self.dtype, self.dim, self.dim)
-        for i in range(0, self.n_particles[None]):
+        for i in range(0, self.n_particles):
             self.U.grad[i] = zero
             self.sig.grad[i] = zero
             self.V.grad[i] = zero
@@ -121,17 +119,17 @@ class MPMSimulator:
 
     @ti.kernel
     def compute_F_tmp(self, f: ti.i32):
-        for p in range(0, self.n_particles[None]):  # Particle state update and scatter to grid (P2G)
+        for p in range(0, self.n_particles):  # Particle state update and scatter to grid (P2G)
             self.F_tmp[p] = (ti.Matrix.identity(self.dtype, self.dim) + self.dt * self.C[f, p]) @ self.F[f, p]
 
     @ti.kernel
     def svd(self):
-        for p in range(0, self.n_particles[None]):
+        for p in range(0, self.n_particles):
             self.U[p], self.sig[p], self.V[p] = ti.svd(self.F_tmp[p])
 
     @ti.kernel
     def svd_grad(self):
-        for p in range(0, self.n_particles[None]):
+        for p in range(0, self.n_particles):
             self.F_tmp.grad[p] += self.backward_svd(self.U.grad[p], self.sig.grad[p], self.V.grad[p], self.U[p],
                                                     self.sig[p], self.V[p])
 
@@ -199,7 +197,7 @@ class MPMSimulator:
 
     @ti.kernel
     def p2g(self, f: ti.i32):
-        for p in range(0, self.n_particles[None]):
+        for p in range(0, self.n_particles):
             base = (self.x[f, p] * self.inv_dx - 0.5).cast(int)
             fx = self.x[f, p] * self.inv_dx - base.cast(self.dtype)
             # Quadratic kernels  [http://mpm.graphics   Eqn. 123, with x=fx, fx-1,fx-2]
@@ -269,7 +267,7 @@ class MPMSimulator:
 
     @ti.kernel
     def g2p(self, f: ti.i32):
-        for p in range(0, self.n_particles[None]):  # grid to particle (G2P)
+        for p in range(0, self.n_particles):  # grid to particle (G2P)
             new_v = ti.Vector.zero(self.dtype, self.dim)
             new_C = ti.Matrix.zero(self.dtype, self.dim, self.dim)
             base = (self.x[f, p] * self.inv_dx - 0.5).cast(int)
@@ -325,7 +323,7 @@ class MPMSimulator:
     # ------------------------------------ io -------------------------------------#
     @ti.kernel
     def readframe(self, f: ti.i32, x: ti.types.ndarray(), v: ti.types.ndarray(), F: ti.types.ndarray(), C: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 x[i, j] = self.x[f, i][j]
                 v[i, j] = self.v[f, i][j]
@@ -335,7 +333,7 @@ class MPMSimulator:
 
     @ti.kernel
     def setframe(self, f: ti.i32, x: ti.types.ndarray(), v: ti.types.ndarray(), F: ti.types.ndarray(), C: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 self.x[f, i][j] = x[i, j]
                 self.v[f, i][j] = v[i, j]
@@ -345,7 +343,7 @@ class MPMSimulator:
 
     @ti.kernel
     def copyframe(self, source: ti.i32, target: ti.i32):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             self.x[target, i] = self.x[source, i]
             self.v[target, i] = self.v[source, i]
             self.F[target, i] = self.F[source, i]
@@ -356,10 +354,10 @@ class MPMSimulator:
                 self.primitives.primitives[i].copy_frame(source, target)
 
     def get_state(self, f):
-        x = np.zeros((self.n_particles[None], self.dim), dtype=self.np_dtype)
-        v = np.zeros((self.n_particles[None], self.dim), dtype=self.np_dtype)
-        F = np.zeros((self.n_particles[None], self.dim, self.dim), dtype=self.np_dtype)
-        C = np.zeros((self.n_particles[None], self.dim, self.dim), dtype=self.np_dtype)
+        x = np.zeros((self.n_particles, self.dim), dtype=self.np_dtype)
+        v = np.zeros((self.n_particles, self.dim), dtype=self.np_dtype)
+        F = np.zeros((self.n_particles, self.dim, self.dim), dtype=self.np_dtype)
+        C = np.zeros((self.n_particles, self.dim, self.dim), dtype=self.np_dtype)
         self.readframe(f, x, v, F, C)
         out = [x, v, F, C]
         for i in self.primitives:
@@ -367,14 +365,14 @@ class MPMSimulator:
         return out
 
     def set_state(self, f, state):
-        self.n_particles[None] = len(state[0])
+        self.n_particles = len(state[0])
         self.setframe(f, *state[:4])
         for s, i in zip(state[4:], self.primitives):
             i.set_state(f, s)
 
     @ti.kernel
     def reset_kernel(self, x: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 self.x[0, i][j] = x[i, j]
             self.v[0, i] = ti.Vector.zero(self.dtype, self.dim)
@@ -387,29 +385,29 @@ class MPMSimulator:
 
     @ti.kernel
     def get_x_kernel(self, f: ti.i32, x: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 x[i, j] = self.x[f, i][j]
 
     @ti.kernel
     def set_x(self, f: ti.i32, x: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 self.x[f, i][j] = x[i, j]
 
     def get_x(self, f):
-        x = np.zeros((self.n_particles[None], self.dim), dtype=self.np_dtype)
+        x = np.zeros((self.n_particles, self.dim), dtype=self.np_dtype)
         self.get_x_kernel(f, x)
         return x
 
     @ti.kernel
     def get_v_kernel(self, f: ti.i32, v: ti.types.ndarray()):
-        for i in range(self.n_particles[None]):
+        for i in range(self.n_particles):
             for j in ti.static(range(self.dim)):
                 v[i, j] = self.v[f, i][j]
 
     def get_v(self, f):
-        v = np.zeros((self.n_particles[None], self.dim), dtype=self.np_dtype)
+        v = np.zeros((self.n_particles, self.dim), dtype=self.np_dtype)
         self.get_v_kernel(f, v)
         return v
 
@@ -453,6 +451,6 @@ class MPMSimulator:
 
     @ti.kernel
     def compute_grid_m_kernel(self, f: ti.i32, idx: ti.i32):
-        for p in range(0, self.n_particles[None]):
+        for p in range(0, self.n_particles):
             if self.object_id[p] == idx:
                 self.compute_grid_m_helper(f, p)
