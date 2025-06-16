@@ -17,9 +17,6 @@ class Agent:
         self._env = env
         self._test_env = test_env
         self.logger = logger
-
-        self._env.seed(seed)
-        self._test_env.seed(2**31-1-seed)
         
         # Algorithm.
         self._algo = algo
@@ -71,7 +68,7 @@ class Agent:
         episode_steps = 0
 
         done = False
-        state = self._env.reset()
+        state,_ = self._env.reset()
         self.logger.reset()
 
         while (not done):
@@ -81,7 +78,8 @@ class Agent:
             else:
                 action = self._algo.explore(state)
 
-            next_state, reward, done, info = self._env.step(action)
+            next_state, reward, terminated, truncated, info = self._env.step(action)
+            done = terminated or truncated
             self.logger.step(state, action, reward, next_state, done, info)
 
             # Set done=True only when the agent fails, ignoring done signal
@@ -127,14 +125,15 @@ class Agent:
         total_return = 0.0
 
         for _ in range(self._num_eval_episodes):
-            state = self._test_env.reset()
+            state,_ = self._test_env.reset()
             episode_return = 0.0
             done = False
             episode_steps = 0
 
             while (not done):
                 action = self._algo.exploit(state)
-                next_state, reward, done, info = self._test_env.step(action)
+                next_state, reward, terminated, truncated, info = self._test_env.step(action)
+                done = terminated or truncated
                 episode_return += reward
                 state = next_state
                 episode_steps += 1
