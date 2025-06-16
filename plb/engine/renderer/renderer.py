@@ -510,7 +510,7 @@ class Renderer:
 
     @ti.kernel
     def render(self):
-        ti.block_dim(128)
+        ti.loop_config(block_dim=128)
         # print(self.sample_sdf(self.bbox[0] + 0.05))
         # return
 
