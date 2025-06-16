@@ -11,7 +11,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 class PlasticineEnv(gym.Env):
-    def __init__(self, cfg_path, version, nn=False):
+    def __init__(self, cfg_path, version, nn=False, seed=None):
         from ..engine.taichi_env import TaichiEnv
         self.cfg_path = cfg_path
         cfg = self.load_variants(cfg_path, version)
@@ -22,14 +22,15 @@ class PlasticineEnv(gym.Env):
         self._init_state = self.taichi_env.get_state()
         self._n_observed_particles = self.cfg.n_observed_particles
 
-        obs = self.reset()
+        obs,info = self.reset(seed=seed)
         self.observation_space = Box(-np.inf, np.inf, obs.shape)
         self.action_space = Box(-1, 1, (self.taichi_env.primitives.action_dim,))
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         self.taichi_env.set_state(**self._init_state)
         self._recorded_actions = []
-        return self._get_obs()
+        return self._get_obs(),{}
 
     def get_obs(self):
         return self._get_obs()

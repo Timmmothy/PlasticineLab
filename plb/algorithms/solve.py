@@ -55,8 +55,7 @@ def main():
 
     env = make(args.env_name, nn=(args.algo=='nn'), sdf_loss=args.sdf_loss,
                             density_loss=args.density_loss, contact_loss=args.contact_loss,
-                            soft_contact_loss=args.soft_contact_loss)
-    env.seed(args.seed)
+                            soft_contact_loss=args.soft_contact_loss, seed=args.seed)
 
     if args.algo == 'sac':
         train_sac(env, args.path, logger, args)
