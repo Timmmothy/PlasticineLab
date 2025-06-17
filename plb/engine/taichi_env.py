@@ -4,9 +4,15 @@ import taichi as ti
 import matplotlib.pyplot as plt
 from ..config.utils import CfgNode
 
-# TODO: run on GPU, fast_math will cause error on float64's sqrt; removing it cuases compile error..
-ti.init(arch=ti.gpu, debug=False)
+# TODO: run on GPU, fast_math will cause error on float64's sqrt; removing it causes compile error.
 
+# debug=True can cause breaking/freezing with certain voxel_res values, see default_config.py
+# fast_math=False also causes problems (even with voxel_res=256)
+# both seem like they are related to f32 vs f64 conversion/precision
+# for both problems, first ep will run fine, then second ep takes a very long time
+# and might freeze completely, but subsequent eps are fine
+
+ti.init(arch=ti.gpu, debug=False) # set fast_math=False, default_fp=ti.f64 for better precision
 
 @ti.data_oriented
 class TaichiEnv:

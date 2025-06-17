@@ -46,7 +46,7 @@ _C.RENDERER = RENDERER = CN()
 RENDERER.spp = 50
 RENDERER.max_ray_depth = 2
 RENDERER.image_res = (512, 512)
-RENDERER.voxel_res = (168, 168, 168)
+RENDERER.voxel_res = (256, 256, 256)  # 128, 168, and 296 break/freeze things when debug=True is set in ti.init(), 256 works (haven't tested other values)
 RENDERER.target_res = (64, 64, 64)
 
 RENDERER.dx = 1. / 150

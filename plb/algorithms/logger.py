@@ -67,7 +67,7 @@ class Logger:
         if done:
             fps = self.steps / (time.time() - self.start)
 
-            print(f"STEP: {self.steps}, reward {self.values['reward']} last_iou {self.values['last_iou']}   fps: {fps}")
+            print(f"STEP: {self.steps}, reward {self.values['reward']}  last_iou {self.values['last_iou']}  fps: {fps}")
             self.write(values=self.values)
             self.summary_writer.write({'log/'+i: k for i, k in self.values.items()})
             self.not_done = False
