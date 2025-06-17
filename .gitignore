@@ -22,6 +22,8 @@ data
 
 *imgui.ini*
 
+/output*
+
 #third_party
 *logs*
 
