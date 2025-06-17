@@ -27,12 +27,13 @@ def eval_policy(policy, eval_env, seed, eval_episodes=10):
 
     for _ in range(eval_episodes):
         tot_eval_episodes += 1
-        state, done = eval_env.reset(), False
+        state,_,done = *eval_env.reset(),False
         episode_steps = 0
         while not done:
             episode_steps+=1
             action = policy.select_action(np.array(state))
-            state, reward, done, info = eval_env.step(action)
+            state, reward, terminated, truncated, info = eval_env.step(action)
+            done = terminated or truncated
             ep_reward += reward
             ep_iou += info['iou']
             avg_reward += reward
@@ -97,7 +98,7 @@ def train_td3(env, path, logger, old_args):
 
     replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
 
-    state, done = env.reset(), False
+    state,_,done = *env.reset(),False
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
@@ -122,7 +123,8 @@ def train_td3(env, path, logger, old_args):
             ).clip(-max_action, max_action)
 
         # Perform action
-        next_state, reward, done, info = env.step(action)
+        next_state, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
         done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
         ep_reward += reward
@@ -147,7 +149,7 @@ def train_td3(env, path, logger, old_args):
             ep_reward=0
             ep_iou = 0
             # Reset environment
-            state, done = env.reset(), False
+            state,_,done = *env.reset(),False
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
