@@ -100,8 +100,7 @@ def solve_nn(env, path, logger, args):
     params = np.concatenate(params)
 
     env.reset()
-
-    taichi_env = env.unwrapped.taichi_env
+    taichi_env: TaichiEnv = env.unwrapped.taichi_env
     solver = SolverNN(taichi_env, logger, None,
                       n_iters=(args.num_steps + T - 1) // T, softness=args.softness, horizon=T,
                       **{"optim.lr": args.lr, "optim.type": args.optim, "init_range": 0.0001})
@@ -114,11 +113,17 @@ def solve_nn(env, path, logger, args):
 
     params = solver.solve()
     taichi_env.nn.set_params(params)
-    os.makedirs(path, exist_ok=True)
     taichi_env.set_copy(True)
+
+    poses = [
+        ((0.5, 0.33, -2.0), (0.0, 0.0)),
+    ]
+
+    for pos, rot in poses:
+        env.unwrapped.taichi_env.renderer.set_camera_pose(camera_pos=pos, camera_rot=rot)
 
     for idx in range(50):
         nn.set_action(0, taichi_env.simulator.substeps)
-        taichi_env.step(None)
-        img = taichi_env.render(mode='rgb_array')
-        cv2.imwrite(f"{path}/{idx:04d}.png", img)
+        env.step(None)
+        img = env.render()
+        cv2.imwrite(f"{path}/{idx:04d}.png", img[..., ::-1].astype(np.uint8))
