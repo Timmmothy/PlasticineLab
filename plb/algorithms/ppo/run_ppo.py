@@ -4,7 +4,7 @@ import os
 import time
 from collections import deque
 
-import gymnasium as gym
+import gym
 import numpy as np
 import torch
 import torch.nn as nn
@@ -41,7 +41,7 @@ def train_ppo(env, path, logger, old_args):
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
-    from plb import envs
+    # from plb import envs
     envs = make_vec_envs(env, args.seed, args.num_processes,
                          args.gamma, args.log_dir, device, False)
 
@@ -104,8 +104,7 @@ def train_ppo(env, path, logger, old_args):
     episode_rewards = deque(maxlen=10)
 
     start = time.time()
-    num_updates = int(
-        args.num_env_steps) // args.num_steps // args.num_processes
+    num_updates = int(args.num_env_steps) // args.num_steps // args.num_processes
 
     episodes = 0
     episodes_step = 0

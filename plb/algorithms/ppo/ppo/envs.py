@@ -1,9 +1,9 @@
 import os
 
-import gymnasium as gym
+import gym
 import numpy as np
 import torch
-from gymnasium.spaces.box import Box
+from gym.spaces.box import Box
 
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
